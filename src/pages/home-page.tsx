@@ -14,9 +14,12 @@ const HomePage: FC = () => {
         <h1>Home</h1>
         <Form>
             { user.isAuthenticated &&
+                <Fragment>
+                <p>Welcome {user.displayName},</p>
                 <p>
                     Click here to logout from AAD <Button onClick={() => authService.logout()}>Logout</Button>
                 </p>
+                </Fragment>
             }
         </Form>
     </Fragment>)
