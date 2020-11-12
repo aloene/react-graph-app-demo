@@ -1,11 +1,12 @@
-import { AuthenticationResult, PublicClientApplication } from "@azure/msal-browser";
+import { AccountInfo, AuthenticationResult, PublicClientApplication } from "@azure/msal-browser";
 import AuthenticationConfig from "../models/authentication-config";
+import { Role } from "../models/role";
+import { User } from "../models/user";
 import Deferred from "./deferred";
 
 export default class AuthenticationService {
     private _publicClient: PublicClientApplication;
-    private _msalCallback: (value: AuthenticationResult | null) => void;
-    private _accountDeferred: Deferred<any>;
+    private _accountDeferred: Deferred<AccountInfo>;
 
     constructor(private authConfig: AuthenticationConfig) {
 
@@ -26,38 +27,42 @@ export default class AuthenticationService {
             }
         });
 
-        this._msalCallback = this.handleAuthResponse.bind(this);
+        this.handleAuthResponse = this.handleAuthResponse.bind(this);
 
         this._publicClient.handleRedirectPromise()
-            .then(this._msalCallback)
+            .then(this.handleAuthResponse)
             .catch(error => {
                 console.error(error);
-
-                // if (error.errorMessage.indexOf("AADB2C90118") > -1) {
-                //     try {
-                //         this._publicClient.loginRedirect(
-                //             {
-                //                 scopes: [ 'openid' ],
-                //                 redirectUri: this.authConfig.forgotPasswordPolicy    
-                //             });
-                            
-                //     } catch(err) {
-                //         console.log(err);
-                //     }
-                // }
             });
 
-        this._accountDeferred = new Deferred<any>();
+        this._accountDeferred = new Deferred<AccountInfo>();
     }
 
     private handleAuthResponse(authResult: AuthenticationResult | null): void {
-        let currentAccount = this._publicClient.getAllAccounts()[0];
-        Object.assign(currentAccount, { firstname: '', lastname: ''});
-        this._accountDeferred.resolver(this._publicClient.getAllAccounts()[0]);
+        if (authResult !== null) {
+            // Redirected from successfull authentication
+            let user = this._publicClient.getAllAccounts()[0];
+            console.log('Just logged in, updating identity to ' + user.username);
+            this._accountDeferred.resolver(this._publicClient.getAllAccounts()[0]);
+        } else {
+            // Not redirected from authentication
+            let users = this._publicClient.getAllAccounts();
+            if (users.length === 1) {
+                console.log('Already logged in, updating identity to ' + users[0].username);
+                this._accountDeferred.resolver(this._publicClient.getAllAccounts()[0]);
+            } else if (users.length === 0) {
+                console.log('No logged in accounts.');
+                this.login();
+            } else {
+                console.error('Multiple logged in accounts !');
+            }
+        }
     }
 
-    getClaims(): Promise<any>{
-        return this._accountDeferred.promise;
+    getUser(): Promise<User>{
+        return this._accountDeferred.promise.then(a => {
+            return new User('', a.username, Role.Reader, true);
+        });
     }
 
     login() {
