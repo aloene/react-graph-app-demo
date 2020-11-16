@@ -3,6 +3,7 @@ export default class AuthenticationConfig {
     clientId: string = '';
     redirectUri: string = '';
     forgotPasswordPolicy: string ='';
+    apiScope: string = '';
 
     constructor(init?: Partial<AuthenticationConfig>) {
         Object.assign(this, init);

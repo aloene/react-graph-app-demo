@@ -1,15 +1,29 @@
-import { AccountInfo, AuthenticationResult, PublicClientApplication } from "@azure/msal-browser";
+import { AccountInfo, AuthenticationResult, InteractionRequiredAuthError, PublicClientApplication, SilentRequest } from "@azure/msal-browser";
 import AuthenticationConfig from "../models/authentication-config";
-import { Role } from "../models/role";
 import { User } from "../models/user";
 import Deferred from "./deferred";
+import axios from 'axios';
+import { UsersService } from "./users-service";
 
 export default class AuthenticationService {
     private _publicClient: PublicClientApplication;
     private _accountDeferred: Deferred<AccountInfo>;
+    private _apiScope: string;
 
-    constructor(private authConfig: AuthenticationConfig) {
+    constructor(
+        private _usersService: UsersService,
+        authConfig: AuthenticationConfig) {
 
+        // Intercept API requests
+        axios.interceptors.request.use(options => {
+            return this.getAccessToken()
+                .then(token => {
+                    options.headers['Authorization'] = 'Bearer ' + token;
+                    return options;
+                });
+        });
+
+        this._apiScope = authConfig.apiScope;
         this._publicClient = new PublicClientApplication({
             auth: {
                 clientId: authConfig.clientId,
@@ -61,14 +75,44 @@ export default class AuthenticationService {
 
     getUser(): Promise<User>{
         return this._accountDeferred.promise.then(a => {
-            return new User('', a.username, Role.Reader, true);
+            return this._usersService.getCurrent().then(u => {
+                return new User('', a.localAccountId, u.role , true);
+            })
         });
     }
 
+    getAccessToken(): Promise<string> {
+        const accessTokenLoginRequest : SilentRequest = {
+            scopes: [this._apiScope],
+            account: this._publicClient.getAllAccounts()[0]
+        };
+
+        console.log('Getting access token...');
+        return this._publicClient.acquireTokenSilent(accessTokenLoginRequest)
+            .then(response => {
+                if (!response.accessToken)  {
+                    console.log('Getting access token with redirect method...');
+                    this._publicClient.acquireTokenRedirect(accessTokenLoginRequest);
+                    return '';
+                } else {
+                    return response.accessToken;
+                }
+            })
+            .catch(error => {
+                if (error instanceof InteractionRequiredAuthError) {
+                    this._publicClient.acquireTokenRedirect(accessTokenLoginRequest);
+                } else {
+                    console.error('An error occurred while fetching authentication token (silently): ' + error);
+                }
+
+                return '';
+            });
+    }
+
     login() {
-        console.log(`Logging in using authority ${this.authConfig.authority}...`);
+        console.log(`Logging in...`);
         this._publicClient.loginRedirect({
-            scopes: ['openid']
+            scopes: [this._apiScope]
         });
     }
 

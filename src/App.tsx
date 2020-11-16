@@ -12,12 +12,18 @@ import './App.css';
 import { ServiceContainer } from 'react-service-container';
 import AuthenticationService from './services/authentication-service';
 import { User } from './models/user';
+import { UsersService } from './services/users-service';
 
-const authService = new AuthenticationService({
+const usersService = new UsersService();
+
+const authService = new AuthenticationService(
+  usersService,
+  {
   authority: process.env.REACT_APP_AAD_B2C_AUTHORITY as string,
   clientId: process.env.REACT_APP_AAD_B2C_CLIENT_ID as string,
   redirectUri: process.env.REACT_APP_AAD_B2C_REDIRECT_URI as string,
-  forgotPasswordPolicy: process.env.REACT_APP_AAD_B2C_FORGOT_PASSWORD_POLICY as string
+  forgotPasswordPolicy: process.env.REACT_APP_AAD_B2C_FORGOT_PASSWORD_POLICY as string,
+  apiScope: process.env.REACT_APP_AAD_B2C_API_SCOPE as string
 });
 
 const userPromise = authService.getUser();
