@@ -15,7 +15,7 @@ const HomePage: FC = () => {
         <Form>
             { user.isAuthenticated &&
                 <Fragment>
-                <p>Welcome (User ID: {user.displayName}),</p>
+                <p>Welcome {user.displayName} ({user.role}),</p>
                 <p>
                     Click here to logout from AAD <Button onClick={() => authService.logout()}>Logout</Button>
                 </p>

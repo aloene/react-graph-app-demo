@@ -76,7 +76,7 @@ export default class AuthenticationService {
     getUser(): Promise<User>{
         return this._accountDeferred.promise.then(a => {
             return this._usersService.getCurrent().then(u => {
-                return new User('', a.localAccountId, u.role , true);
+                return new User(u.id, u.firstname, u.lastname, u.role , true);
             })
         });
     }
