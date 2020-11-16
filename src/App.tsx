@@ -13,6 +13,7 @@ import { ServiceContainer } from 'react-service-container';
 import AuthenticationService from './services/authentication-service';
 import { User } from './models/user';
 import { UsersService } from './services/users-service';
+import CustomersService from './services/customers-service';
 
 const usersService = new UsersService();
 
@@ -37,7 +38,8 @@ const App: FC = () => {
 
   return (
   <ServiceContainer providers={[ {provide: User, useValue: currentUser },
-    { provide: AuthenticationService, useValue: authService }]}>
+    { provide: AuthenticationService, useValue: authService },
+    CustomersService]}>
     <Router>
       <Layout className="layout">
         <Layout.Header>
