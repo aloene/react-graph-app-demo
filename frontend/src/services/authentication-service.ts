@@ -84,7 +84,8 @@ export default class AuthenticationService {
     getAccessToken(): Promise<string> {
         const accessTokenLoginRequest : SilentRequest = {
             scopes: [this._apiScope],
-            account: this._publicClient.getAllAccounts()[0]
+            account: this._publicClient.getAllAccounts()[0],
+            extraQueryParameters: { provider_type: this.getProviderType() }
         };
 
         console.log('Getting access token...');
@@ -109,7 +110,7 @@ export default class AuthenticationService {
             });
     }
 
-    login() {
+    private getProviderType(): string {
         // Reuse old login type
         if (!window.localStorage.getItem('auth-type')) {
             window.localStorage.setItem(
@@ -119,7 +120,11 @@ export default class AuthenticationService {
                     : 'local');
         }
 
-        let authType = window.localStorage.getItem('auth-type') as string;
+        return window.localStorage.getItem('auth-type') as string;
+    }
+
+    login() {
+        let authType = this.getProviderType();
 
         console.log(`Logging in using ${authType} provider...`);
         this._publicClient.loginRedirect({
