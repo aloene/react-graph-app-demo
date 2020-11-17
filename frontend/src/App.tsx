@@ -14,6 +14,7 @@ import AuthenticationService from './services/authentication-service';
 import { User } from './models/user';
 import { UsersService } from './services/users-service';
 import CustomersService from './services/customers-service';
+import LoginPage from './pages/login-page';
 
 const usersService = new UsersService();
 
@@ -52,6 +53,9 @@ const App: FC = () => {
         <Layout.Content style={{ padding: '0.5em 0 0 1.5em' }}>
           <div className="site-layout-content">
             <Switch>
+              <Route path="/login-aad">
+                <LoginPage />
+              </Route>
               <Route path="/api">
                 <ApiPage />
               </Route>

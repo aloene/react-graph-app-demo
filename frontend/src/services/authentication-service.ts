@@ -110,9 +110,21 @@ export default class AuthenticationService {
     }
 
     login() {
-        console.log(`Logging in...`);
+        // Reuse old login type
+        if (!window.localStorage.getItem('auth-type')) {
+            window.localStorage.setItem(
+                'auth-type',
+                window.location.pathname.endsWith('login-aad')
+                    ? 'aad_b2b'
+                    : 'local');
+        }
+
+        let authType = window.localStorage.getItem('auth-type') as string;
+
+        console.log(`Logging in using ${authType} provider...`);
         this._publicClient.loginRedirect({
-            scopes: [this._apiScope]
+            scopes: [this._apiScope],
+            extraQueryParameters: { provider_type: authType }
         });
     }
 

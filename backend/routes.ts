@@ -8,7 +8,7 @@ export class Routes {
 
   public routes(app: ExpressApp): void {
     app.route("/users/current").get(this.isAuthorized('Reader', 'Admin'), this.usersController.current);
-    app.route("/customers").get(this.isAuthorized('Admin'), this.customersController.all);
+    app.route("/customers").get(this.isAuthorized('Reader'), this.customersController.all);
   }
 
   private isAuthorized(... roles: string[]) {
