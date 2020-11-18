@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/msal-node": "^1.0.0-beta.1",
     "@types/cors": "^2.8.8",
     "@types/passport-azure-ad": "^4.0.7",
     "body-parser": "^1.19.0",
