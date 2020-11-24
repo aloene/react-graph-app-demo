@@ -22,7 +22,6 @@ export class UsersService {
 
     getUsersByName(name: string): Promise<any> {
         return this._confidentialClient.acquireTokenByClientCredential(this._gestionTiersApiTokenRequest).then(t => {
-                console.log(t.accessToken);
                 return null;
         });
     }
