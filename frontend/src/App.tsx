@@ -56,6 +56,9 @@ const App: FC = () => {
               <Route path="/login-aad">
                 <LoginPage />
               </Route>
+              <Route path="/login-google">
+                <LoginPage />
+              </Route>
               <Route path="/api">
                 <ApiPage />
               </Route>

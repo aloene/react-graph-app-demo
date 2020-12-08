@@ -116,8 +116,10 @@ export default class AuthenticationService {
             window.localStorage.setItem(
                 'auth-type',
                 window.location.pathname.endsWith('login-aad')
-                    ? 'aad_b2b'
-                    : 'local');
+                    ? 'aad'
+                    : (window.location.pathname.endsWith('login-google')
+                        ? 'google'
+                        :'local'));
         }
 
         return window.localStorage.getItem('auth-type') as string;
